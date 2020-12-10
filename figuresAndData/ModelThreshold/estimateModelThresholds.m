@@ -1,9 +1,15 @@
 % This file gets the thresholds of the computational model.
+%
+% The model takes a dot product of the LMS cone response image with the
+% receptive field and then adds a gaussian noise proportional to the mean
+% response. 
+%
+
 clear;
-decisionSigma = [0.088];
+decisionSigma = [0.088]; % Noise in the decision making process.
 nAverage = 10;
 cov_factor = {'Cov_0_0001','Cov_0_0003','Cov_0_001','Cov_0_003','Cov_0_01','Cov_0_03','Cov_0_10','Cov_0_30','Cov_1_00'};
-modelThresholds = zeros(nAverage, length(cov_factor));
+modelThresholds = zeros(nAverage, length(cov_factor)); % Space allocation
 
 for iterAverage = 1:nAverage
     
@@ -15,13 +21,14 @@ for iterAverage = 1:nAverage
         pathToStimulus = ['LMSImages/',cov_factor{iterCovariance},'.mat'];
         stimulusFile = load(pathToStimulus);
         
-        % Perform analysis
+        % Perform Analysis
+        % Make RFs
         LMSFilter = repmat(reshape(make2DRF(51, 10),[],1),3,1);
         
         % Initialize LMS images set
         LMSImages = stimulusFile.LMSImages;
         
-        %% Get Estimates
+        % Get Estimates
         XEstimate =[];
         
         XEstimate = LMSImages'*LMSFilter;
