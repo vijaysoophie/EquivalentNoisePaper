@@ -6,7 +6,7 @@
 %
 
 clear;
-decisionSigma = [0.088]; % Noise in the decision making process.
+decisionSigma = [0.088]; % Noise in the decision making process. This was chosen by trial and error.
 nAverage = 10;
 cov_factor = {'Cov_0_0001','Cov_0_0003','Cov_0_001','Cov_0_003','Cov_0_01','Cov_0_03','Cov_0_10','Cov_0_30','Cov_1_00'};
 modelThresholds = zeros(nAverage, length(cov_factor)); % Space allocation
