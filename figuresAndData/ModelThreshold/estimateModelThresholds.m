@@ -9,6 +9,7 @@
 %% History
 %    12/10/20  dhb  Add quick plot at end
 %              dhb  Coding and comments for clarity
+%    12/12/20  dhb  Check variance growth with lightness.
 
 %% Initialize
 clear; close all;
@@ -41,8 +42,11 @@ modelThresholds = zeros(nAverage, length(cov_factor));
 % scalar levels.
 for iterAverage = 1:nAverage
     for iterCovariance = 1:length(cov_factor)
-        % Clear except for what we're carrying forward
-        clearvars -except outputStruct1 outputStruct2 cov_factor fig iterCovariance modelThresholds decisionSigma iterAverage nComparisonPerLRF nImagesPerComparison nPixels rfCenterRadiusPixels
+        % Clear except for what we're carrying forward.  This an produce
+        % weird bugs if you add a variable below that is not local to this loop,
+        % but forget to add it to this list.
+        clearvars -except outputStruct1 outputStruct2 cov_factor fig iterCovariance modelThresholds decisionSigma iterAverage ...
+            nComparisonPerLRF nImagesPerComparison nPixels rfCenterRadiusPixels stdVar stdVar1
         
         % Make 2D center-surround receptive field
         LMSFilter = repmat(reshape(make2DRF(nPixels, rfCenterRadiusPixels),[],1),3,1);
@@ -59,9 +63,9 @@ for iterAverage = 1:nAverage
         end
         
         % Get RF responses for all images.
-        XEstimate = LMSImages'*LMSFilter;
-        meanXEstimates = reshape(repmat(mean(reshape(XEstimate,[],nComparisonPerLRF)),nImagesPerComparison,1),[],1);
-        XEstimate = XEstimate +  meanXEstimates.*normrnd(0,decisionSigma,size(XEstimate,1),1);
+        XEstimateNoDecisionNoise = LMSImages'*LMSFilter;
+        meanXEstimates = reshape(repmat(mean(reshape(XEstimateNoDecisionNoise,[],nComparisonPerLRF)),nImagesPerComparison,1),[],1);     
+        XEstimate = XEstimateNoDecisionNoise +  meanXEstimates.*normrnd(0,decisionSigma,size(XEstimateNoDecisionNoise,1),1);
         
         %% Make psychometric function
         %
@@ -72,16 +76,32 @@ for iterAverage = 1:nAverage
         %
         % The term lightness is used in variable naming below to denote the RF
         % response.
-        N = 10000;
-        Lightness = reshape(XEstimate(:,1),nImagesPerComparison,nComparisonPerLRF);
-        cmpIndex = randi(nImagesPerComparison,N,nComparisonPerLRF);
-        stdIndex = randi(nImagesPerComparison,N,nComparisonPerLRF);
+        nSimulatedTrials = 10000;
+        lightnessNoDecisionNoise = reshape(XEstimateNoDecisionNoise(:,1),nImagesPerComparison,nComparisonPerLRF);
+        lightness = reshape(XEstimate(:,1),nImagesPerComparison,nComparisonPerLRF);
+        cmpIndex = randi(nImagesPerComparison,nSimulatedTrials,nComparisonPerLRF);
+        stdIndex = randi(nImagesPerComparison,nSimulatedTrials,nComparisonPerLRF);
         
-        stdLightness = zeros(N,nComparisonPerLRF);
-        cmpLightness = zeros(N,nComparisonPerLRF);
+        stdLightness = zeros(nSimulatedTrials,nComparisonPerLRF);
+        cmpLightness = zeros(nSimulatedTrials,nComparisonPerLRF);
         for ii = 1:nComparisonPerLRF
-            stdLightness(:,ii) = Lightness(stdIndex(:,ii),6);
-            cmpLightness(:,ii) = Lightness(cmpIndex(:,ii),ii);
+            stdLightness(:,ii) = lightness(stdIndex(:,ii),6);
+            cmpLightness(:,ii) = lightness(cmpIndex(:,ii),ii);
+        end
+        
+        %% Get sample variance for standard.
+        %
+        % This should be proportional to the covariance factors, if there
+        % is no truncation in our image set.  That's because the covariance
+        % matrix of a linear function of a multivariate Gaussian is a linear
+        % function of the covaraiance matrix.  So if we scale the
+        % covariance matrix and pass the variable through a linear
+        % receptive field, the resulting univariate distribution should be
+        % Gaussian and have variance scaled in same proportion across our
+        % covariance scalars.
+        if (iterAverage == 1)
+            theLightnessNoDecisionNoiseVar = var(lightnessNoDecisionNoise);
+            stdLightnessNoDecisionNoiseVar(iterCovariance) = theLightnessNoDecisionNoiseVar(6);
         end
         
         % Get psychometric function and threshold
@@ -93,7 +113,18 @@ modelThresholds = mean(modelThresholds);
 covScalar = [0.0001 0.0003, 0.001,0.003,0.01, 0.03,0.10, 0.30,1];
 save('modelThresholds.mat', 'covScalar', 'modelThresholds');
 
-% Quick plot
+% Quick plot of sample standard covariance versus covScalars
+% shows they are not linear.  Note that there
+% is some variance for the very smallest covariance factor, although
+% the ratio to largest is ~10^-3 so maybe it makes sense if we in fact drew
+% very small noise, or if it arises because of rendering noise.
+figure; clf; hold on
+plot(covScalar,stdLightnessNoDecisionNoiseVar,'ro','MarkerFaceColor','r');
+plot(covScalar,stdLightnessNoDecisionNoiseVar,'r','LineWidth',1);
+xlabel('Covariance Scalar');
+ylabel('Standard RF Response Var');
+
+% Quick plot of predictions
 figure; clf; hold on
 plot(log10(covScalar),log10(modelThresholds.^2),'ro','MarkerSize',12,'MarkerFaceColor','r');
 xlabel('Log Covariance Scalar');
