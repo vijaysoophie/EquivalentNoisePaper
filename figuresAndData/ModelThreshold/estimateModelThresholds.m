@@ -46,7 +46,7 @@ for iterAverage = 1:nAverage
         % weird bugs if you add a variable below that is not local to this loop,
         % but forget to add it to this list.
         clearvars -except outputStruct1 outputStruct2 cov_factor fig iterCovariance modelThresholds decisionSigma iterAverage ...
-            nComparisonPerLRF nImagesPerComparison nPixels rfCenterRadiusPixels stdVar stdVar1
+            nComparisonPerLRF nImagesPerComparison nPixels rfCenterRadiusPixels lightnessNoDecisionNoiseVar
         
         % Make 2D center-surround receptive field
         LMSFilter = repmat(reshape(make2DRF(nPixels, rfCenterRadiusPixels),[],1),3,1);
@@ -100,8 +100,7 @@ for iterAverage = 1:nAverage
         % Gaussian and have variance scaled in same proportion across our
         % covariance scalars.
         if (iterAverage == 1)
-            theLightnessNoDecisionNoiseVar = var(lightnessNoDecisionNoise);
-            stdLightnessNoDecisionNoiseVar(iterCovariance) = theLightnessNoDecisionNoiseVar(6);
+            lightnessNoDecisionNoiseVar(iterCovariance,:) = var(lightnessNoDecisionNoise);
         end
         
         % Get psychometric function and threshold
@@ -119,10 +118,23 @@ save('modelThresholds.mat', 'covScalar', 'modelThresholds');
 % the ratio to largest is ~10^-3 so maybe it makes sense if we in fact drew
 % very small noise, or if it arises because of rendering noise.
 figure; clf; hold on
-plot(covScalar,stdLightnessNoDecisionNoiseVar,'ro','MarkerFaceColor','r');
-plot(covScalar,stdLightnessNoDecisionNoiseVar,'r','LineWidth',1);
+theColors = ['r' 'g' 'b' 'k' 'c' 'y'];
+colorIndex = 1;
+for cc = 1:nComparisonPerLRF
+    plot(covScalar,lightnessNoDecisionNoiseVar(:,cc),[theColors(colorIndex) 'o'],'MarkerFaceColor',theColors(colorIndex));
+    plot(covScalar,lightnessNoDecisionNoiseVar(:,cc),theColors(colorIndex),'LineWidth',1);
+    colorIndex = colorIndex +1;
+    if (colorIndex > length(theColors))
+        colorIndex = 1;
+    end
+    effectiveCovarianceScalarsRaw(:,cc) = lightnessNoDecisionNoiseVar(:,cc)/lightnessNoDecisionNoiseVar(end,cc);
+end
 xlabel('Covariance Scalar');
 ylabel('Standard RF Response Var');
+effectiveCovarianceScalars = mean(effectiveCovarianceScalarsRaw,2);
+
+% Compute normalized effective covariance scalars
+
 
 % Quick plot of predictions
 figure; clf; hold on
