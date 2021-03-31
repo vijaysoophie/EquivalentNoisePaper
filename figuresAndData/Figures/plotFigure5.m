@@ -17,10 +17,10 @@ ThresholdObserver8 = data(2:end, 8:10)';
 ThresholdObserver17 = data(2:end, 11:13)';
 
 covScaleModelForMarkers = [0.000001 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
-ModelThresholdObserver2  = [0.0243 0.0255 0.0258 0.0267 0.0247 0.0256 0.0269 0.0302 0.0326 0.0422]; % decision noise = 0.10; surround value = -0.15
+ModelThresholdObserver2  = [0.0254 0.0254 0.0253 0.0255 0.0253 0.0258 0.0264 0.0299 0.0334 0.0419]; % decision noise = 0.10; surround value = -0.15
 ModelThresholdObserver4  = [0.0244 0.0235 0.0235 0.0237 0.0240 0.0244 0.0244 0.0248 0.0271 0.0296]; % decision noise = 0.08; surround value = -0.10
 ModelThresholdObserver8  = [0.0237 0.0233 0.0238 0.0234 0.0236 0.0235 0.0242 0.0250 0.0276 0.0307]; % decision noise = 0.08; surround value = -0.11
-ModelThresholdObserver17 = [0.0265 0.0254 0.0254 0.0264 0.0251 0.0265 0.0273 0.0316 0.0361 0.0455]; % decision noise = 0.11; surround value = -0.16
+ModelThresholdObserver17 = [0.0258 0.0259 0.0257 0.0255 0.0258 0.0264 0.0270 0.0316 0.0362 0.0461]; % decision noise = 0.11; surround value = -0.16
 
 %% Plot thresholds
 hFig2 = figure(); % This starts a new plotting window
@@ -41,19 +41,20 @@ tsdThreshDeltaPlot = ComputeTSDModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,
 
 errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver2.^2)), std(log10(ThresholdObserver2.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
 plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver2.^2),'ks','MarkerFaceColor','k','MarkerSize',10,'LineWidth',2);
+plot(linspace(-6,0,100), -4.198 + 1.127.^(((linspace(-6,0,100)+6)/5).^6.16), 'k','LineWidth',2);
+plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver2.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
 
 hold on; box on;
 lFitLabel{1} = 'Observer 2';
-lFitLabel{2} = ['\{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Computational Observer';
+lFitLabel{2} = ['TSD \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{3} = 'Lin-RF \{0.0258, 0.0455\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
 xlabel('log_{10}(\sigma^2)');
 ylabel('log_{10}(T^2)');
 xlim([-6.5 0.5]);
-ylim([-3.4 -2.5]);
+ylim([-3.42 -2.49]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
 
@@ -72,12 +73,13 @@ tsdThreshDeltaPlot = ComputeTSDModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,
 
 errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver4.^2)), std(log10(ThresholdObserver4.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
 plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver4.^2),'ks','MarkerFaceColor','k','MarkerSize',10,'LineWidth',2);
+plot(linspace(-6,0,100), -4.247 + 1.05.^(((linspace(-6,0,100)+6)/5).^6.981), 'k','LineWidth',2);
+plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver4.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
 
 hold on; box on;
 lFitLabel{1} = 'Observer 4';
-lFitLabel{2} = ['\{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Computational Observer';
+lFitLabel{2} = ['TSD \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{3} = 'Lin-RF \{0.0242, 0.0365\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -86,7 +88,7 @@ set(gca, 'Fontsize',20);
 xlabel('log_{10}(\sigma^2)');
 ylabel('log_{10}(T^2)');
 xlim([-6.5 0.5]);
-ylim([-3.4 -2.5]);
+ylim([-3.42 -2.49]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
 
@@ -104,12 +106,13 @@ tsdThreshDeltaPlot = ComputeTSDModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,
 
 errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver8.^2)), std(log10(ThresholdObserver8.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
 plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver8.^2),'ks','MarkerFaceColor','k','MarkerSize',10,'LineWidth',2);
+plot(linspace(-6,0,100), -4.26 + 1.063.^(((linspace(-6,0,100)+6)/5).^6.841), 'k','LineWidth',2);
+plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver8.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
 
 hold on; box on;
 lFitLabel{1} = 'Observer 8';
-lFitLabel{2} = ['\{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Computational Observer';
+lFitLabel{2} = ['TSD \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{3} = 'Lin-RF \{0.0239, 0.0374\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -117,7 +120,7 @@ legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
 xlabel('log_{10}(\sigma^2)');
 ylabel('log_{10}(T^2)');
-ylim([-3.4 -2.5]);
+ylim([-3.42 -2.49]);
 xlim([-6.5 0.5]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
@@ -136,12 +139,13 @@ tsdThreshDeltaPlot = ComputeTSDModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,
 
 errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver17.^2)), std(log10(ThresholdObserver17.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
 plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver17.^2),'ks','MarkerFaceColor','k','MarkerSize',10,'LineWidth',2);
+plot(linspace(-6,0,100), -4.188 + 1.161.^(((linspace(-6,0,100)+6)/5).^5.678), 'k','LineWidth',2);
+plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver17.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
 
 hold on; box on;
 lFitLabel{1} = 'Observer 17';
-lFitLabel{2} = ['\{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Computational Observer';
+lFitLabel{2} = ['TSD \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{3} = 'Lin-RF \{0.0262, 0.0492\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -149,7 +153,7 @@ legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
 xlabel('log_{10}(\sigma^2)');
 ylabel('log_{10}(T^2)');
-ylim([-3.4 -2.5]);
+ylim([-3.42 -2.49]);
 xlim([-6.5 0.5]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})

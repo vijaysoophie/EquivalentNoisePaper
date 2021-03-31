@@ -43,7 +43,7 @@ g8 = errorbar([6]+0.05 , mean(log10(ThresholdExperiment3_observer17.^2)), std(lo
 
 legend({'Observer 4','Observer 5','Observer 8','Observer 11','Observer 2','Observer 17'},'location','northwest');
 xlim([0.5 6.5]);
-ylim([-3.4 -2.49]);
+ylim([-3.42 -2.49]);
 xticks([1:6]);
 xticklabels({'1','2','2a', '3', '3a', '\sigma^2 = 1'});
 box on;
