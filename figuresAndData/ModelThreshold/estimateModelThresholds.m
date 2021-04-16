@@ -42,7 +42,7 @@ modelThresholds = zeros(nAverage, length(cov_factor));
 % scalar levels.
 for iterAverage = 1:nAverage
     for iterCovariance = 1:length(cov_factor)
-        % Clear except for what we're carrying forward.  This an produce
+        % Clear except for what we're carrying forward.  This can produce
         % weird bugs if you add a variable below that is not local to this loop,
         % but forget to add it to this list.
         clearvars -except outputStruct1 outputStruct2 cov_factor fig iterCovariance modelThresholds decisionSigma iterAverage ...
