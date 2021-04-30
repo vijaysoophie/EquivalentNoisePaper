@@ -1,7 +1,16 @@
----------------------------------------------------------------------------
-AUG 11, 2020 5:03 PM Vijay Singh
+THIS FILE IS USED TO WRITE COMMENTS ABOUT THE EDITING PROCESS
 
-LET'S USE THIS FILE TO WRITE COMMENTS ABOUT THE EDITING PROCESS
+---------------------------------------------------------------------------
+APR 30, 2021 6:36 PM Vijay Singh
+
+1. This update is for version 14.
+
+2. Vijay Singh moved the files related to previous versions out of this repository.
+
+3. Eventually, he will also remove the files word files named writeupXX, figures.docs.
+
+4. Finally the folder will have the final writeup and figures as .pdf file. And the Supplementary Information.
+
 
 ---------------------------------------------------------------------------
 AUG 11, 2020 5:10 PM Vijay Singh
