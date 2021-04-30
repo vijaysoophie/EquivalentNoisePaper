@@ -31,7 +31,7 @@ fitSignalExponent = false;
 simThresholdDPrime = 1;
 simSignalExponent = 1;
 
-% Fit the underlying TSD model
+% Fit the underlying SDT model
 %
 % If we're fitting thresholdDPrime, pass [] in key/value pair.  Otherwise pass fixed value
 % to use.
@@ -50,23 +50,23 @@ else
 end
 
 %% This is for mean subject
-[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitTSDModel(covScale',mean(ThresholdMeanSubject),...
+[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdMeanSubject),...
     'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
-fprintf('\nTSD fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
+fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
     tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
 
 % Generate smooth curve for plotting
-tsdThreshDeltaPlot = ComputeTSDModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
+tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
 
 
 %% This is for computational model
-[tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model] = FitTSDModel(covScaleModel,ModelThresholds,...
+[tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model] = FitSDTModel(covScaleModel,ModelThresholds,...
     'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
-fprintf('\nTSD fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
+fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
     tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model);
 
 % Generate smooth curve for plotting
-tsdThreshDeltaPlot_Model = ComputeTSDModel(tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model,covScalarsPlot);
+tsdThreshDeltaPlot_Model = ComputeSDTModel(tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model,covScalarsPlot);
 
 %% Plot thresholds
 figure;
@@ -79,7 +79,7 @@ plot(log10(covScaleModelForMarkers),log10(ModelThresholds.^2),'ks','MarkerFaceCo
 
 %%
 lFitLabel{1} = 'Mean Subject';
-lFitLabel{2} = ['TSD \{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{2} = ['SDT \{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
 
 % Threshold for computational observer
 hold on; box on;
@@ -95,7 +95,7 @@ xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
 % save2pdf('Figure4.pdf', gcf, 600);
 
-%% Compute thresholds under simple underlying TSD model
+%% Compute thresholds under simple underlying SDT model
 %
 % For the signalExponent == 1 case, just need to invert the forward relation
 %       thresholdDPrime = (thresholdLRF - standardLRF)/sqrt(sigman2_n + covScalar*sigma2_e);
@@ -112,7 +112,7 @@ xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
 % isn't clear.  Note that when the signalExponent isn't 1, it's hard to
 % interpret the sigma's of the fit.  Or at least, we have not thought that
 % through yet.
-function thresholdDelta = ComputeTSDModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars)
+function thresholdDelta = ComputeSDTModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars)
 
 for jj = 1:length(covScalars)
 %     thresholdDelta(jj) = (sqrt(sigma2_i + covScalars(jj)*sigma2_e)*thresholdDPrime).^(1/signalExponent);
@@ -121,8 +121,8 @@ end
 
 end
 
-%% FitTSDModel
-function [thresholdDPrime,sigma2_i,sigma2_e,signalExponent] = FitTSDModel(covScalars,thresholdDelta,varargin)
+%% FitSDTModel
+function [thresholdDPrime,sigma2_i,sigma2_e,signalExponent] = FitSDTModel(covScalars,thresholdDelta,varargin)
 
 p = inputParser;
 p.addParameter('thresholdDPrime',1,@(x) (isempty(x) | isnumeric(x)));
@@ -175,8 +175,8 @@ for ee = 1:nExps
     
     x0 = [thresholdDPrime0 sigma2_i0 sigma2_e0 signalExponent0];
     options = optimset(optimset('fmincon'),'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
-    x = fmincon(@(x)FitTSDModelFun(x,covScalars,thresholdDelta),x0,[],[],[],[],vlb,vub,[],options);
-    f = FitTSDModelFun(x,covScalars,thresholdDelta);
+    x = fmincon(@(x)FitSDTModelFun(x,covScalars,thresholdDelta),x0,[],[],[],[],vlb,vub,[],options);
+    f = FitSDTModelFun(x,covScalars,thresholdDelta);
     if (f < bestF)
         bestF = f;
         bestX = x;
@@ -190,14 +190,14 @@ sigma2_e = bestX(3);
 signalExponent = bestX(4);
 end
 
-%% Error function for TSD model fitting
-function f = FitTSDModelFun(x,covScalars,thresholdDelta)
+%% Error function for SDT model fitting
+function f = FitSDTModelFun(x,covScalars,thresholdDelta)
 
 thresholdDPrime = x(1);
 sigma2_i = x(2);
 sigma2_e = x(3);
 signalExponent = x(4);
-predictedDelta = ComputeTSDModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars);
+predictedDelta = ComputeSDTModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars);
 diff2 = (thresholdDelta - predictedDelta).^2;
 f = sqrt(mean(diff2));
 
