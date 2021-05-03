@@ -1,4 +1,4 @@
-function RF = make2DRF(latticeSize, r1)
+function RF = make2DRF_fixedperiphery(latticeSize, r1, vals)
 
 x = (1:latticeSize) - (latticeSize-1)/2 -1;
 y = (1:latticeSize) - (latticeSize-1)/2 -1;
@@ -9,8 +9,8 @@ distance = X.^2 + Y.^2;
 
 RF = distance < r1^2;
 RF = 2*RF-1;
-RF(RF>0) = RF(RF>0)/sum(sum(RF(RF>0)));
-RF(RF<0) = RF(RF<0)/abs(sum(sum(RF(RF<0))));
+RF(RF>0) = vals(1);
+RF(RF<0) = vals(2);
 
 
 % figure;

@@ -1,8 +1,15 @@
 % This script calcautes the root mean squared error (RMSE) between the 
-% thresholds of the mean human subject and the computational model. The
-% RMSE is fit with a quadratic polynomial in two variables. The polynomial
-% is minimized to get the best fit parameters.
-
+% thresholds of the mean human subject and the LINRF model. The RMSE is fit
+% by a quadratic polynomial in two variables. The polynomial is minimized 
+% to get the parameters that give lowest RMSE.
+% 
+% The same process was repeated for individual subjects to get the best
+% fit parametes of the individual subjects. To do this, remove the
+% appropriate lines from the thresholdAllSubjects matrix in the section below.
+%
+% May 02 2021 Vijay Singh wrote this.
+%
+%%
 % Load human subject threholds 
 clear;
 load('subjectThresholds.mat');
@@ -48,5 +55,12 @@ legend( h, 'Fit of quadratic polynomial in two variables', 'RMSE vs. decisionSig
 xlabel( 'decisionSigma', 'Interpreter', 'none' );
 ylabel( 'surroundValue', 'Interpreter', 'none' );
 zlabel( 'RMSE', 'Interpreter', 'none' );
-grid on
+grid on;
+
+%% Parameters that give minimum RMSE
+decisionSigmaMin = -((2*fitresult.p02*fitresult.p10 - fitresult.p01*fitresult.p11)/(-fitresult.p11^2 + 4*fitresult.p02*fitresult.p20));
+surroundValueMin = -((fitresult.p10*fitresult.p11 - 2*fitresult.p01*fitresult.p20)/(fitresult.p11^2 - 4*fitresult.p02*fitresult.p20));
+
+
+
 

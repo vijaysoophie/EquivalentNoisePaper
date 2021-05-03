@@ -1,14 +1,28 @@
-% This script plots figure 5 log threshold squared vs log sigma squared
+% This script plots Figure 5 of the Equivalent Noise paper. 
 %
+% In this figure we plot log threshold squared vs log sigma squared for
+% each observer. The data is then fit by Signal Detection Theory (SDT) 
+% model and the Linear Receptive Field (Linear RF) model. The figure is
+% saved in the folder EquivalentNoisePaper/figuresAndData/Figures as 
+% Figure5.pdf.
+%
+% Unknown date: Vijay Singh wrote this.
+% May 02, 2021: Vijay Singh modified and added comments.
+%
+%%
 clear; close all;
+
 %% Load .csv file
+
 dataFile = importfileForFigure4('../ObserverData/subjectThreshold.csv');
 data = table2array(dataFile);
 
 %% Observer covariance scales and thresholds
-covScale = [eps data(3:end,1)']';
-covScaleForMarkers = [0.000001 data(3:end,1)']';
-nCovScalarsPlot = 100;
+
+covScale = [eps data(3:end,1)']'; % Covariance scales used for plotting. eps is used for covariance scale zero for calculations.
+covScaleForMarkers = [0.000001 data(3:end,1)']'; % Zero covariance scale is replaced by 0.000001 for plotting.
+
+nCovScalarsPlot = 100;  % Number of points used in plot for the smooth curves.
 covScalarsPlot = logspace(log10(covScaleForMarkers(1)),log10(covScaleForMarkers(end)),nCovScalarsPlot);
 
 ThresholdObserver2 = data(2:end, 2:4)';
@@ -17,10 +31,10 @@ ThresholdObserver8 = data(2:end, 8:10)';
 ThresholdObserver17 = data(2:end, 11:13)';
 
 covScaleModelForMarkers = [0.000001 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
-ModelThresholdObserver2  = [0.0254 0.0254 0.0253 0.0255 0.0253 0.0258 0.0264 0.0299 0.0334 0.0419]; % decision noise = 0.10; surround value = -0.15
-ModelThresholdObserver4  = [0.0244 0.0235 0.0235 0.0237 0.0240 0.0244 0.0244 0.0248 0.0271 0.0296]; % decision noise = 0.08; surround value = -0.10
-ModelThresholdObserver8  = [0.0237 0.0233 0.0238 0.0234 0.0236 0.0235 0.0242 0.0250 0.0276 0.0307]; % decision noise = 0.08; surround value = -0.11
-ModelThresholdObserver17 = [0.0258 0.0259 0.0257 0.0255 0.0258 0.0264 0.0270 0.0316 0.0362 0.0461]; % decision noise = 0.11; surround value = -0.16
+ModelThresholdObserver2  = [0.0254 0.0254 0.0253 0.0255 0.0253 0.0258 0.0264 0.0299 0.0334 0.0419]; % decision noise = 18490.2; surround value = -0.132154
+ModelThresholdObserver4  = [0.0244 0.0235 0.0235 0.0237 0.0240 0.0244 0.0244 0.0248 0.0271 0.0296]; % decision noise = 17958.6; surround value = -0.0833749
+ModelThresholdObserver8  = [0.0237 0.0233 0.0238 0.0234 0.0236 0.0235 0.0242 0.0250 0.0276 0.0307]; % decision noise = 17636.1; surround value = -0.0896376
+ModelThresholdObserver17 = [0.0258 0.0259 0.0257 0.0255 0.0258 0.0264 0.0270 0.0316 0.0362 0.0461]; % decision noise = 18551.1; surround value = -0.147739
 
 %% Plot thresholds
 hFig2 = figure(); % This starts a new plotting window
@@ -47,7 +61,7 @@ plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver2.^2),'ks','Mar
 hold on; box on;
 lFitLabel{1} = 'Observer 2';
 lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Lin-RF \{0.0258, 0.0455\}';
+lFitLabel{3} = 'LINRF \{0.0258, 0.0455\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
@@ -79,7 +93,7 @@ plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver4.^2),'ks','Mar
 hold on; box on;
 lFitLabel{1} = 'Observer 4';
 lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Lin-RF \{0.0242, 0.0365\}';
+lFitLabel{3} = 'LINRF \{0.0242, 0.0365\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -112,7 +126,7 @@ plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver8.^2),'ks','Mar
 hold on; box on;
 lFitLabel{1} = 'Observer 8';
 lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Lin-RF \{0.0239, 0.0374\}';
+lFitLabel{3} = 'LINRF \{0.0239, 0.0374\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -145,7 +159,7 @@ plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver17.^2),'ks','Ma
 hold on; box on;
 lFitLabel{1} = 'Observer 17';
 lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'Lin-RF \{0.0262, 0.0492\}';
+lFitLabel{3} = 'LINRF \{0.0262, 0.0492\}';
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 
@@ -158,7 +172,7 @@ xlim([-6.5 0.5]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
 
-% save2pdf('Figure5.pdf', gcf, 600);
+save2pdf('Figure5.pdf', gcf, 600);
 %% Compute thresholds under simple underlying SDT model
 %
 % For the signalExponent == 1 case, just need to invert the forward relation

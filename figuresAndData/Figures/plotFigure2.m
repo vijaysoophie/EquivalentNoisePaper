@@ -1,5 +1,12 @@
-% This script plots figure 2 (psychometric function) for the Lightness paper
+% This script plots figure 2 (psychometric function) for the Equivalent
+% noise paper. The script requires Palamedes_1.9.0 toolbox. The figure is
+% saved in the folder EquivalentNoisePaper/figuresAndData/Figures as 
+% Figure2.pdf.
 %
+% Unknown date: Vijay Singh wrote this.
+% May 02 2021: Vijay Singh updated this.
+%
+%%
 clear; close all;
 %% Load .csv file
 dataFile = importfileForFigure2('../ObserverData/proportionComparisonChosen.csv');
@@ -22,7 +29,8 @@ xLimits = [(min(LRFLevels) - min(diff(LRFLevels))/2) ...
 set(hFig,'units','pixels', 'Position', [1 1 600 500]);
 hold on; box on;
 
-%% plot a vertical line indicating the standard
+%% Plot a vertical line indicating the standard
+
 lStdY = plot([LRFLevels(6) LRFLevels(6)], yLimits,':r','LineWidth', 2);
 
 % Psychometric function form

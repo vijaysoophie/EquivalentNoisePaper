@@ -8,20 +8,9 @@
 %% Initialize
 clear; close all;
 
-% Set parameters that controls scale of additive noise variance. We will 
-% first estimate the threshold for a range of parameters and identify the
-% best parameters by minimizing the error between the model threshold and
-% human threshold.
-
-% UNCOMMENT THIS AND COMMENT THE NEXT TWO LINES TO ESTIMATE THRESHOLD FOR A
-% RANGE OF PARAMETERS
-%
-decisionSigma = linspace(10000, 30000, 21);
-surroundValue = linspace(-0.2, -0.02, 21);
-
-% THESE ARE THE BEST FIT PARAMETERS
-% decisionSigma = 18082.2;  
-% surroundValue = -0.119734;
+% Set parameters that controls scale of additive noise variance.
+decisionSigma = 18082.2;  
+surroundValue = -0.119734;
 
 % Average the full calculation 10 times
 nAverage = 10;
@@ -61,7 +50,7 @@ for iterSurroundValue = 1:length(surroundValue)
                 % Perform analysis
                 
                 % Initialize the filter and training set
-                newFilter = repmat(reshape(make2DRF_fixedperiphery(nPixels, rfCenterRadiusPixels, [1, surroundValue(iterSurroundValue)]),[],1),3,1);
+                newFilter = repmat(reshape(make2DRF(nPixels, rfCenterRadiusPixels, [1, surroundValue(iterSurroundValue)]),[],1),3,1);
                 
                 if (iterCovariance == 1)
                     
@@ -121,8 +110,8 @@ for iterSurroundValue = 1:length(surroundValue)
         end
     end
 end
-covScalar = [0.0001 0.0003, 0.001,0.003,0.01, 0.03,0.10, 0.30,1];
-save('modelThresholdsTest.mat', 'covScalar', 'modelThresholds', 'decisionSigma', 'surroundValue');
+covScalar = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.10, 0.30, 1];
+save('modelThresholdsMeanSubject.mat', 'covScalar', 'modelThresholds', 'decisionSigma', 'surroundValue');
 
 %%
 function threshPal = returnThreshold(cmpChosen)

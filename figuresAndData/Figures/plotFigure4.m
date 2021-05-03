@@ -1,14 +1,26 @@
-% This script plots figure 4 log threshold squared vs log sigma squared
+% This script plots Figure 4 of the Equivalent Noise paper.
 %
-clear; %close all;
+% In this figure we plot log threshold squared vs log sigma squared for the
+% mean observer. The data is then fit by Signal Detection Theory (SDT) 
+% model and the Linear Receptive Field (Linear RF) model. The figure is
+% saved in the folder EquivalentNoisePaper/figuresAndData/Figures as 
+% Figure4.pdf.
+%
+% Unknown date: Vijay Singh wrote this.
+% May 02, 2021: Vijay Singh modified and added comments.
+%
+%%
+
+clear; close all;
 %% Load .csv file
 dataFile = importfileForFigure4('../ObserverData/subjectThreshold.csv');
 data = table2array(dataFile);
 
-%% Subject covariance scales and thresholds
-covScale = [eps data(3:end,1)']';
-covScaleForMarkers = [0.000001 data(3:end,1)']';
-nCovScalarsPlot = 100;
+%% Get the covariance scales and subject thresholds
+covScale = [eps data(3:end,1)']'; % Covariance scales used for plotting. eps is used for covariance scale zero for calculations.
+covScaleForMarkers = [0.000001 data(3:end,1)']'; % Zero covariance scale is replaced by 0.000001 for plotting.
+
+nCovScalarsPlot = 100; % Number of points used in plot for the smooth curves.
 covScalarsPlot = logspace(log10(covScaleForMarkers(1)),log10(covScaleForMarkers(end)),nCovScalarsPlot);
 
 ThresholdSubject2 = data(2:end, 2:4)';
@@ -21,12 +33,13 @@ ThresholdMeanSubject = [ThresholdSubject2; ThresholdSubject4; ThresholdSubject8;
 %% Model covariance scales and thresholds
 covScaleModel = [eps 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
 covScaleModelForMarkers = [0.000001 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
-% ModelThresholds = [ 0.0246 0.0249 0.0260 0.0290 0.0322 0.0390]; %decision noise 0.09036
+% Model thresholds obtained through simulations. The 
+% estimateModelThresholds.m file in the folder ModelThreshold was used to
+% obtain these values.
 ModelThresholds = [0.0248 0.0246 0.0242 0.0245 0.0248 0.0251 0.0255 0.0281 0.0315 0.0386]; %decision noise 18082.2 surround value -0.0119734
 %%
 fitThresholdDPrime = false;
 fitSignalExponent = false;
-
 
 simThresholdDPrime = 1;
 simSignalExponent = 1;
@@ -49,7 +62,9 @@ else
     passSignalExponent = simSignalExponent;
 end
 
-%% This is for mean subject
+%% This part fits the SDT model to the thresholds of the mean subject.
+% It also finds the paramters of the SDT model fit.
+
 [tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdMeanSubject),...
     'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
 fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
@@ -59,7 +74,9 @@ fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e 
 tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
 
 
-%% This is for computational model
+%% This part fits the SDT model to the thresholds of the LINRF model.
+% It also finds the paramters of the SDT model fit.
+
 [tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model] = FitSDTModel(covScaleModel,ModelThresholds,...
     'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
 fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
@@ -83,7 +100,7 @@ lFitLabel{2} = ['SDT \{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i)
 
 % Threshold for computational observer
 hold on; box on;
-lFitLabel{3} = ['Lin-RF \{$\sigma_i, \sigma_e$\} = \{0.0250, 0.0429\}'];
+lFitLabel{3} = ['LINRF \{$\sigma_i, \sigma_e$\} = \{0.0250, 0.0429\}'];
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
@@ -93,7 +110,7 @@ xlim([-6.5 0.5]);
 ylim([-3.42 -2.49]);
 xticks([-6 -4:0]);
 xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
-% save2pdf('Figure4.pdf', gcf, 600);
+save2pdf('Figure4.pdf', gcf, 600);
 
 %% Compute thresholds under simple underlying SDT model
 %

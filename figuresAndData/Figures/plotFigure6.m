@@ -1,4 +1,11 @@
-% Plot of figure 6. The internal and external noise for various observers.
+% This script plots Figure 6 of the Equivalent Noise paper.
+% The figure is saved in the folder EquivalentNoisePaper/figuresAndData/Figures 
+% as Figure6.pdf.
+%
+% The internal and external noise for various observers are given below.
+% The noise of the SDT model were estimated by fitting the SDT model to the
+% subject threshold data. 
+% The noise for the LINRF model was estimated by 
 
 % 
 noiseEstimatedBySDTModel    = [24817   2       4       8       17;      % ObserverID
@@ -13,11 +20,11 @@ noiseEstimatedBySDTModel    = [24817   2       4       8       17;      % Observ
 %                         722600  716200  741300  738100  708200];
 %                     
 %                     
-% valueOfSurround = [24817    2           4           8           17;     % ObserverID
-%                   -0.119734 -0.132154  -0.0833749  -0.0896376   -0.147739];
+% valueOfSurround      = [24817    2           4           8           17;     % ObserverID
+%                         -0.119734 -0.132154  -0.0833749  -0.0896376   -0.147739];
 
                   
-noiseEstimatedByCompRFModel = [24817   2       4       8       17;      % ObserverID
+noiseEstimatedByLINRFModel = [24817   2       4       8       17;      % ObserverID
                                0.0250  0.0258  0.0242  0.0239  0.0262;  % Internal Noise
                                0.0429  0.0455  0.0365  0.0374  0.0492]; % External Noise                                    
                   
@@ -26,8 +33,8 @@ hold on;
 plot([0.9:4.9], noiseEstimatedBySDTModel(2,:),'o', 'MarkerSize', 12, 'color', [0.39,0.83,0.07], 'linewidth', 2);
 plot([0.9:4.9], noiseEstimatedBySDTModel(3,:),'o', 'MarkerSize', 12, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
 
-plot([1.1:5.1], noiseEstimatedByCompRFModel(2,:), 's', 'MarkerSize', 15,'color', [0.39,0.83,0.07], 'linewidth', 2);
-plot([1.1:5.1], noiseEstimatedByCompRFModel(3,:), 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
+plot([1.1:5.1], noiseEstimatedByLINRFModel(2,:), 's', 'MarkerSize', 15,'color', [0.39,0.83,0.07], 'linewidth', 2);
+plot([1.1:5.1], noiseEstimatedByLINRFModel(3,:), 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
 
 legend({'\sigma_{i,SDT}', '\sigma_{e0,SDT}', '\sigma_{i,LINRF}', '\sigma_{e0,LINRF}'}, 'location', 'northeastoutside', 'FontSize',20)
 xlim([0.5 5.5]);
