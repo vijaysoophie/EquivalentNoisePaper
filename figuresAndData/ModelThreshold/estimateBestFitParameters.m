@@ -37,9 +37,19 @@ end
 
 %% Calculate the root mean squared error between human and model threhsolds
 RMSE = sum((squeeze(mean(modelThresholds,3)) - thresholdMeanSubject3D).^2,3);
+figure;
+surf(decisionSigma, surroundValue, RMSE);
+xlabel( 'decisionSigma', 'Interpreter', 'none' );
+ylabel( 'surroundValue', 'Interpreter', 'none' );
+zlabel( 'RMSE', 'Interpreter', 'none' );
+title( 'RMSE', 'Interpreter', 'none' );
+view([0 90]);
 
-%%
-[xData, yData, zData] = prepareSurfaceData( decisionSigma, surroundValue, RMSE );
+%% Fit RMSE with a second order polynomial of two variables.
+% Since the landscape is not entirely convex, we have chosen a region
+% around the minima to do this fit.
+
+[xData, yData, zData] = prepareSurfaceData( decisionSigma(7:11), surroundValue(7:11), RMSE(7:11, 7:11));
 
 % Set up fittype and options.
 ft = fittype( 'poly22' );
@@ -56,11 +66,19 @@ xlabel( 'decisionSigma', 'Interpreter', 'none' );
 ylabel( 'surroundValue', 'Interpreter', 'none' );
 zlabel( 'RMSE', 'Interpreter', 'none' );
 grid on;
+view([0 90]);
 
 %% Parameters that give minimum RMSE
+% These parameters that give the lowest RMSE can be obtained by first
+% differentiating the fit polynomial by x and y, settting the corresponding
+% equations to zero and solving the coupled set of equations. The solutions
+% are below:
+
 decisionSigmaMin = -((2*fitresult.p02*fitresult.p10 - fitresult.p01*fitresult.p11)/(-fitresult.p11^2 + 4*fitresult.p02*fitresult.p20));
 surroundValueMin = -((fitresult.p10*fitresult.p11 - 2*fitresult.p01*fitresult.p20)/(fitresult.p11^2 - 4*fitresult.p02*fitresult.p20));
 
+% The corresponding value of minimum RMSE is:
+fitresult([decisionSigmaMin, surroundValueMin]);
 
 
 

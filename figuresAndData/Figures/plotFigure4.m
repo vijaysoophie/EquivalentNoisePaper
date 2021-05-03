@@ -109,7 +109,7 @@ ylabel('log_{10}(T^2)');
 xlim([-6.5 0.5]);
 ylim([-3.42 -2.49]);
 xticks([-6 -4:0]);
-xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
+xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'});
 save2pdf('Figure4.pdf', gcf, 600);
 
 %% Compute thresholds under simple underlying SDT model
@@ -132,7 +132,6 @@ save2pdf('Figure4.pdf', gcf, 600);
 function thresholdDelta = ComputeSDTModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars)
 
 for jj = 1:length(covScalars)
-%     thresholdDelta(jj) = (sqrt(sigma2_i + covScalars(jj)*sigma2_e)*thresholdDPrime).^(1/signalExponent);
     thresholdDelta(jj) = (sqrt(sigma2_i + covScalars(jj)*sigma2_e)*thresholdDPrime);
 end
 

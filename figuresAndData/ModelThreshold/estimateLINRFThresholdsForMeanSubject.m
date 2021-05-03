@@ -1,9 +1,15 @@
-% This file gets the thresholds of the linear receptive field computational model.
+% This file estimates the thresholds of the linear receptive field LINRF 
+% model for the best fit parameters corresponding to the mean observer. 
 %
-% The model takes a dot product of the LMS cone response image with the
+% The LINRF model takes a dot product of the LMS cone response image with the
 % receptive field and then adds a gaussian noise proportional to the mean
-% response. The mean is taken over all stimuli, so that it's just additive 
-% Gaussian noise.
+% response.
+%
+% To get the thresholds for the individual observers, change the value of
+% the two parameters decisionSigma and surroundValue accordingly.
+%
+% Unknown date: Vijay Singh wrote this.
+% May 03, 2021: Vijay Singh modified this.
 %
 %% Initialize
 clear; close all;
