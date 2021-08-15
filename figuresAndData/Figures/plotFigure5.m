@@ -1,67 +1,107 @@
-% This script plots Figure 5 of the Equivalent Noise paper. 
+% This script plots Figure 5 of the Equivalent Noise paper.
 %
-% In this figure we plot log threshold squared vs log sigma squared for
-% each observer. The data is then fit by Signal Detection Theory (SDT) 
+% In this figure we plot log threshold squared vs log sigma squared for the
+% mean observer. The data is then fit by Signal Detection Theory (SDT) 
 % model and the Linear Receptive Field (Linear RF) model. The figure is
 % saved in the folder EquivalentNoisePaper/figuresAndData/Figures as 
-% Figure5.pdf.
+% Figure4.pdf.
 %
 % Unknown date: Vijay Singh wrote this.
 % May 02, 2021: Vijay Singh modified and added comments.
+% Aug 15, 2021: Vijay Singh changed name to Figure5.
 %
 %%
+
 clear; close all;
-
 %% Load .csv file
-
-dataFile = importfileForFigure4('../ObserverData/subjectThreshold.csv');
+dataFile = importfileForFigure5('../ObserverData/subjectThreshold.csv');
 data = table2array(dataFile);
 
-%% Observer covariance scales and thresholds
-
+%% Get the covariance scales and subject thresholds
 covScale = [eps data(3:end,1)']'; % Covariance scales used for plotting. eps is used for covariance scale zero for calculations.
 covScaleForMarkers = [0.000001 data(3:end,1)']'; % Zero covariance scale is replaced by 0.000001 for plotting.
 
-nCovScalarsPlot = 100;  % Number of points used in plot for the smooth curves.
+nCovScalarsPlot = 100; % Number of points used in plot for the smooth curves.
 covScalarsPlot = logspace(log10(covScaleForMarkers(1)),log10(covScaleForMarkers(end)),nCovScalarsPlot);
 
-ThresholdObserver2 = data(2:end, 2:4)';
-ThresholdObserver4 = data(2:end, 5:7)';
-ThresholdObserver8 = data(2:end, 8:10)';
-ThresholdObserver17 = data(2:end, 11:13)';
+ThresholdSubject2 = data(2:end, 2:4)';
+ThresholdSubject4 = data(2:end, 5:7)';
+ThresholdSubject8 = data(2:end, 8:10)';
+ThresholdSubject17 = data(2:end, 11:13)';
 
+ThresholdMeanSubject = [ThresholdSubject2; ThresholdSubject4; ThresholdSubject8; ThresholdSubject17];
+
+%% Model covariance scales and thresholds
+covScaleModel = [eps 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
 covScaleModelForMarkers = [0.000001 0.0001 0.0003 0.001 0.003 0.01 0.03 0.1 0.3 1]';
-ModelThresholdObserver2  = [0.0254 0.0254 0.0253 0.0255 0.0253 0.0258 0.0264 0.0299 0.0334 0.0419]; % decision noise = 18490.2; surround value = -0.132154
-ModelThresholdObserver4  = [0.0244 0.0235 0.0235 0.0237 0.0240 0.0244 0.0244 0.0248 0.0271 0.0296]; % decision noise = 17958.6; surround value = -0.0833749
-ModelThresholdObserver8  = [0.0237 0.0233 0.0238 0.0234 0.0236 0.0235 0.0242 0.0250 0.0276 0.0307]; % decision noise = 17636.1; surround value = -0.0896376
-ModelThresholdObserver17 = [0.0258 0.0259 0.0257 0.0255 0.0258 0.0264 0.0270 0.0316 0.0362 0.0461]; % decision noise = 18551.1; surround value = -0.147739
+% Model thresholds obtained through simulations. The 
+% estimateModelThresholds.m file in the folder ModelThreshold was used to
+% obtain these values.
+ModelThresholds = [0.0248 0.0246 0.0242 0.0245 0.0248 0.0251 0.0255 0.0281 0.0315 0.0386]; %decision noise 18082.2 surround value -0.0119734
+%%
+fitThresholdDPrime = false;
+fitSignalExponent = false;
+
+simThresholdDPrime = 1;
+simSignalExponent = 1;
+
+% Fit the underlying SDT model
+%
+% If we're fitting thresholdDPrime, pass [] in key/value pair.  Otherwise pass fixed value
+% to use.
+if (fitThresholdDPrime)
+    passThresholdDPrime = [];
+else
+    passThresholdDPrime = simThresholdDPrime;
+end
+
+% If we're fitting signalExponent, pass [] in key/value pair. Otherwise
+% pass fixed value to use.
+if (fitSignalExponent)
+    passSignalExponent = [];
+else
+    passSignalExponent = simSignalExponent;
+end
+
+%% This part fits the SDT model to the thresholds of the mean subject.
+% It also finds the paramters of the SDT model fit.
+
+[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdMeanSubject),...
+    'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
+fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
+    tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
+
+% Generate smooth curve for plotting
+tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
+
+
+%% This part fits the SDT model to the thresholds of the LINRF model.
+% It also finds the paramters of the SDT model fit.
+
+[tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model] = FitSDTModel(covScaleModel,ModelThresholds,...
+    'thresholdDPrime',passThresholdDPrime,'signalExponent',passSignalExponent);
+fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
+    tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model);
+
+% Generate smooth curve for plotting
+tsdThreshDeltaPlot_Model = ComputeSDTModel(tsdThresholdDPrime_Model,tsdSigma2_i_Model,tsdSigma2_e_Model,tsdSignalExponent_Model,covScalarsPlot);
 
 %% Plot thresholds
-hFig2 = figure(); % This starts a new plotting window
-set(hFig2,'units','normalized', 'Position', [0.1 0.1 0.8 0.25]);
-
-
-%% Plot Figure for Observer 2
-s1 = subplot(1,4,1);
+figure;
 hold on; box on;
+errorbar(log10(covScaleForMarkers),mean((log10(ThresholdMeanSubject.^2))), std(log10(ThresholdMeanSubject.^2))/sqrt(12),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
+plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',2);
 
-[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdObserver2),...
-    'thresholdDPrime', 1,'signalExponent', 1);
-fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
-    tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
+plot(linspace(-6,0,100), -4.224 + 1.112.^(((linspace(-6,0,100)+6)/5).^6.345), 'k','LineWidth',2);
+plot(log10(covScaleModelForMarkers),log10(ModelThresholds.^2),'ks','MarkerFaceColor','k','MarkerSize',5);
 
-% Generate smooth curve for plotting
-tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
+%%
+lFitLabel{1} = 'Mean Subject';
+lFitLabel{2} = ['SDT \{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
 
-errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver2.^2)), std(log10(ThresholdObserver2.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
-plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(linspace(-6,0,100), -4.198 + 1.127.^(((linspace(-6,0,100)+6)/5).^6.16), 'k','LineWidth',2);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver2.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
-
+% Threshold for computational observer
 hold on; box on;
-lFitLabel{1} = 'Observer 2';
-lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'LINRF \{0.0258, 0.0455\}';
+lFitLabel{3} = ['LINRF \{$\sigma_i, \sigma_e$\} = \{0.0250, 0.0429\}'];
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);
@@ -70,109 +110,9 @@ ylabel('log_{10}(T^2)');
 xlim([-6.5 0.5]);
 ylim([-3.42 -2.49]);
 xticks([-6 -4:0]);
-xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
-
-
-%% Plot Figure for Observer 4
-s2 = subplot(1,4,2);
-hold on; box on;
-
-[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdObserver4),...
-    'thresholdDPrime', 1,'signalExponent', 1);
-fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
-    tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
-
-% Generate smooth curve for plotting
-tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
-
-errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver4.^2)), std(log10(ThresholdObserver4.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
-plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(linspace(-6,0,100), -4.247 + 1.05.^(((linspace(-6,0,100)+6)/5).^6.981), 'k','LineWidth',2);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver4.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
-
-hold on; box on;
-lFitLabel{1} = 'Observer 4';
-lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'LINRF \{0.0242, 0.0365\}';
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-set(gca, 'Fontsize',20);
-xlabel('log_{10}(\sigma^2)');
-ylabel('log_{10}(T^2)');
-xlim([-6.5 0.5]);
-ylim([-3.42 -2.49]);
-xticks([-6 -4:0]);
-xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
-
-%% Plot Figure for Observer 8
-s3 = subplot(1,4,3);
-hold on; box on;
-
-[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdObserver8),...
-    'thresholdDPrime', 1,'signalExponent', 1);
-fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
-    tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
-
-% Generate smooth curve for plotting
-tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
-
-errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver8.^2)), std(log10(ThresholdObserver8.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
-plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(linspace(-6,0,100), -4.26 + 1.063.^(((linspace(-6,0,100)+6)/5).^6.841), 'k','LineWidth',2);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver8.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
-
-hold on; box on;
-lFitLabel{1} = 'Observer 8';
-lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'LINRF \{0.0239, 0.0374\}';
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-set(gca, 'Fontsize',20);
-xlabel('log_{10}(\sigma^2)');
-ylabel('log_{10}(T^2)');
-ylim([-3.42 -2.49]);
-xlim([-6.5 0.5]);
-xticks([-6 -4:0]);
-xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
-
-%% Plot Figure for Observer 17
-s4 = subplot(1,4,4);
-hold on; box on;
-
-[tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent] = FitSDTModel(covScale',mean(ThresholdObserver17),...
-    'thresholdDPrime', 1,'signalExponent', 1);
-fprintf('\nSDT fit to data: thresholdDPrime = %0.1f, sigma2_i = %0.4g, sigma2_e = %0.4g, signalExponent = %0.3f\n', ...
-    tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent);
-
-% Generate smooth curve for plotting
-tsdThreshDeltaPlot = ComputeSDTModel(tsdThresholdDPrime,tsdSigma2_i,tsdSigma2_e,tsdSignalExponent,covScalarsPlot);
-
-errorbar(log10(covScaleForMarkers),mean(log10(ThresholdObserver17.^2)), std(log10(ThresholdObserver17.^2))/sqrt(3),'ro','MarkerFaceColor','r','MarkerSize',10,'LineWidth',2);
-plot(log10(covScalarsPlot),log10(tsdThreshDeltaPlot.^2),'r','LineWidth',1);
-plot(linspace(-6,0,100), -4.188 + 1.161.^(((linspace(-6,0,100)+6)/5).^5.678), 'k','LineWidth',2);
-plot(log10(covScaleModelForMarkers), log10(ModelThresholdObserver17.^2),'ks','MarkerFaceColor','k','MarkerSize',5,'LineWidth',2);
-
-hold on; box on;
-lFitLabel{1} = 'Observer 17';
-lFitLabel{2} = ['SDT \{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
-lFitLabel{3} = 'LINRF \{0.0262, 0.0492\}';
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-
-legend(lFitLabel,'interpreter','latex','location','northwest');
-set(gca, 'Fontsize',20);
-xlabel('log_{10}(\sigma^2)');
-ylabel('log_{10}(T^2)');
-ylim([-3.42 -2.49]);
-xlim([-6.5 0.5]);
-xticks([-6 -4:0]);
-xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'})
-
+xticklabels({'-Inf', '-4', '-3', '-2', '-1', '0'});
 save2pdf('Figure5.pdf', gcf, 600);
+
 %% Compute thresholds under simple underlying SDT model
 %
 % For the signalExponent == 1 case, just need to invert the forward relation
@@ -193,7 +133,6 @@ save2pdf('Figure5.pdf', gcf, 600);
 function thresholdDelta = ComputeSDTModel(thresholdDPrime,sigma2_i,sigma2_e,signalExponent,covScalars)
 
 for jj = 1:length(covScalars)
-%     thresholdDelta(jj) = (sqrt(sigma2_i + covScalars(jj)*sigma2_e)*thresholdDPrime).^(1/signalExponent);
     thresholdDelta(jj) = (sqrt(sigma2_i + covScalars(jj)*sigma2_e)*thresholdDPrime);
 end
 
@@ -280,3 +219,5 @@ diff2 = (thresholdDelta - predictedDelta).^2;
 f = sqrt(mean(diff2));
 
 end
+
+
