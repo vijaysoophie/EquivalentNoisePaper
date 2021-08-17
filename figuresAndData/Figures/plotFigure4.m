@@ -66,7 +66,7 @@ for rowSubplot = 1:4
         
         
         % Subplot x-Label
-        if (rowSubplot == 6)
+        if (rowSubplot == 4)
             xlabel('Comparison LRF', 'Fontsize', 15);
         end
         
