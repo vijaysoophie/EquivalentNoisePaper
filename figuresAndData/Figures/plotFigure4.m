@@ -13,21 +13,22 @@ makeDataForFigure4;
 
 %% Plot Figure
 hFig = figure();
-set(hFig,'units','pixels', 'Position', [100 100 1200 1600]);
+set(hFig,'units','pixels', 'Position', [100 100 1600 1200]);
 
-for colSubplot = 1:4
-    for rowSubplot = 1:6
-        subplot(6, 4, (rowSubplot-1)*4 + colSubplot)
+for rowSubplot = 1:4
+    for colSubplot = 1:6
+        subplot(4, 6, (rowSubplot - 1)*6 + colSubplot)
         hold on; box on;
         %% Plot a vertical line indicating the standard
         lStdY = plot([LRFLevels(6) LRFLevels(6)], yLimits,':r','LineWidth', 1);
 
-        covNumber = rowSubplot;
-        subjectNumber = colSubplot;
+        covNumber = colSubplot;
+        subjectNumber = rowSubplot;
         for iterAcquisition = 1:3
             acquisitionNumber = iterAcquisition;
             indexToplot(iterAcquisition) = (subjectNumber-1)*18 + (covNumber - 1)*3 + acquisitionNumber + 1;       
         end
+        
         %% Plot Data 
         
         % Plot proportion comparison
@@ -50,19 +51,20 @@ for colSubplot = 1:4
         hAxis.XTickLabelRotation = 90;
 
         % Subplot Title
-        if (rowSubplot == 1)
-            switch colSubplot
+        if (colSubplot == 1)
+            switch rowSubplot
                 case 1
-                    title('Observer 2', 'Fontsize', 15);
+                    text(0.23, 0.5, 'Observer 2', 'Fontsize', 20);
                 case 2
-                    title('Observer 4', 'Fontsize', 15);
+                    text(0.23, 0.5, 'Observer 4', 'Fontsize', 20);
                 case 3
-                    title('Observer 8', 'Fontsize', 15);
+                    text(0.23, 0.5, 'Observer 8', 'Fontsize', 20);
                 case 4
-                    title('Observer 17', 'Fontsize', 15);
+                    text(0.23, 0.5, 'Observer 17', 'Fontsize', 20);
             end
         end
-
+        
+        
         % Subplot x-Label
         if (rowSubplot == 6)
             xlabel('Comparison LRF', 'Fontsize', 15);
@@ -79,22 +81,23 @@ for colSubplot = 1:4
             'Location','Northwest','FontSize',10);
         
         % Subplot Title
-        if (colSubplot == 1)
-            switch rowSubplot
+        if (rowSubplot == 1)
+            switch colSubplot
                 case 1
-                    text(0.27, 0.5, '\sigma^2 = 0.00', 'Fontsize', 20);
+                    title('\sigma^2 = 0.00', 'Fontsize', 20);
                 case 2
-                    text(0.27, 0.5, '\sigma^2 = 0.01', 'Fontsize', 20);
+                    title('\sigma^2 = 0.01', 'Fontsize', 20);
                 case 3
-                    text(0.27, 0.5, '\sigma^2 = 0.03', 'Fontsize', 20);
+                    title('\sigma^2 = 0.03', 'Fontsize', 20);
                 case 4
-                    text(0.27, 0.5, '\sigma^2 = 0.10', 'Fontsize', 20);
+                    title('\sigma^2 = 0.10', 'Fontsize', 20);
                 case 5
-                    text(0.27, 0.5, '\sigma^2 = 0.30', 'Fontsize', 20);
+                    title('\sigma^2 = 0.30', 'Fontsize', 20);
                 case 6
-                    text(0.27, 0.5, '\sigma^2 = 1.00', 'Fontsize', 20);
+                    title('\sigma^2 = 1.00', 'Fontsize', 20);
             end
         end
+        
     end
 end
 
