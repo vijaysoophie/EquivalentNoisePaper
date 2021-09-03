@@ -27,7 +27,7 @@ scaleFactor = 5.4;
 pathToLMSStruct = fullfile('dataForLuminanceEstimation', 'Cov_0_00', 'LMSStruct.mat');
 temp = load(pathToLMSStruct); LMSStruct = temp.LMSStruct; clear temp;
 
-%% Load the calibration file
+%% Load the calibration struct from the saved data
 pathToFile = fullfile('dataForLuminanceEstimation', 'CNSU_0002_Condition_0_00_Iteration_1-1.mat');
 load(pathToFile);
 cal = data.cal;  clear data;
