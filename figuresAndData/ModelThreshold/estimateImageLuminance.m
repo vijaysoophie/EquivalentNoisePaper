@@ -3,20 +3,20 @@
 %
 % This script estimates the average luminance of the standard image in the 
 % simplest case (covariance scale factor zero). It also estimates the
-% average luminance of the target object for all LRF values. For this we
-% first calculate the values (settings) that were applied to the monitor
-% primaries in the experiment. These correspond to the gamma corrected 
-% values of the primaries that needs to be applied to the monitor for 
-% producing the required LMS response for the standard observer. 
-% We then convert these values back to the primary co-ordinates using the
-% inverse gamma function. We use the tristimulus values of the 1931
-% standard observer and the spectral power distribution of the monitor
-% primaries to get the CIE-XYZ color co-ordiantes. The luminance is read as
+% average luminance of the target object for all LRF values. 
+%
+% To estimate the luminance we first calculate the monitor settings values. 
+% These correspond to the gamma corrected values of the primaries that 
+% needs to be applied to the monitor for producing the required LMS 
+% response for the standard observer. To do this we use the LMS struct that
+% has the LMS images.
+% We then use the tristimulus values of the 1931 standard observer and the 
+% calibration struct to get the conversion matrix required to convert
+% settings values to CIE-XYZ color coordiantes. The luminance is read as
 % the Y coordinate.
 %
-% Sep 03, 2021; Vijay Singh wrote this.
-
-
+% Sep 04, 2021; Vijay Singh wrote this.
+%
 %%
 clear;
 
@@ -30,32 +30,61 @@ temp = load(pathToLMSStruct); LMSStruct = temp.LMSStruct; clear temp;
 %% Load the calibration struct from the saved data
 pathToFile = fullfile('dataForLuminanceEstimation', 'CNSU_0002_Condition_0_00_Iteration_1-1.mat');
 load(pathToFile);
-cal = data.cal;  clear data;
+cal = data.cal;
+% cal = cals{1};
+
+%% Initialize calibration structure for the cones
+calLMS = SetSensorColorSpace(cal, LMSStruct.T_cones, LMSStruct.S); % Fix the last option
+
+%% Set Gamma Method
+calLMS = SetGammaMethod(calLMS,0);
 
 %% Convert LMS image to monitor settings image using calibration struct and scale factor
-imageInSettings = zeros(size(LMSStruct.LMSImageInCalFormat));
-for ii = 1:length(LMSStruct.luminanceLevels)
-    imageInSettings(:,:,ii) = SensorToSettings(cal, scaleFactor*LMSStruct.LMSImageInCalFormat(:,:,ii));
+LMSImageInCalFormat = LMSStruct.LMSImageInCalFormat;
+LMSImageInCalFormat = reshape(LMSImageInCalFormat, 3, []);
+imageInSettings = SensorToSettings(calLMS, scaleFactor*LMSImageInCalFormat);
+
+
+%% Convert from monitor settings to CIE-XYZ
+load T_xyz1931
+settingsToXYZConversionConstant = 683;
+T_xyz = settingsToXYZConversionConstant*T_xyz1931; S_xyz = S_xyz1931;
+calXYZ = SetSensorColorSpace(calLMS,T_xyz,S_xyz);
+
+imagesInXYZ = calXYZ.M_device_linear*imageInSettings;
+
+%% Cal format to image 
+XYZImages = reshape(imagesInXYZ, 3, LMSStruct.cropImageSizeX, LMSStruct.cropImageSizeY, length(LMSStruct.luminanceLevels));
+
+%% Mean luminance of standard image
+indexForLuminance = 2; % Index of Y
+NImagesPerLevel = length(LMSStruct.luminanceLevels)/11;
+imagesInXYZ = reshape(imagesInXYZ,3,[],11*NImagesPerLevel);
+stdImageIndex = 6; % Index of standard image
+stdImageIndex = (stdImageIndex-1)*NImagesPerLevel+1:stdImageIndex*NImagesPerLevel;     % Index of standard image if there are more than one images per level
+meanStandard = mean(mean(imagesInXYZ(indexForLuminance, : , stdImageIndex)));
+
+%% Make a mask for the target
+maskImage = zeros(LMSStruct.cropImageSizeX, LMSStruct.cropImageSizeY);
+center = 101;
+radius = 47;
+
+for ii = 1:201
+    for jj = 1:201
+        if ((ii - center)^2 + (jj - center)^2 < radius^2)
+            maskImage(ii, jj) = 1;
+        end
+    end
 end
-imageInSettings(imageInSettings < 0 ) = 0;
 
-%% Convert from monitor settings to primary
-imageInPrimary = zeros(size(LMSStruct.LMSImageInCalFormat));
-for ii = 1:length(LMSStruct.luminanceLevels)
-    imageInPrimary(:,:,ii) = SettingsToPrimary(cal, imageInSettings(:,:,ii));
-end
+maskImage(maskImage ==0) = NaN;
 
-%% Check if there is any difference if we converted straight from sensor to primary
-imageInPrimaryUsingSensor = zeros(size(LMSStruct.LMSImageInCalFormat));
-for ii = 1:length(LMSStruct.luminanceLevels)
-    imageInPrimaryUsingSensor(:,:,ii) = SensorToPrimary(cal, scaleFactor*LMSStruct.LMSImageInCalFormat(:,:,ii));
-end
+%% Mean luminance of target objects in the images
+YImagesOfTarget = squeeze(XYZImages(indexForLuminance,:,:,:)).*repmat(maskImage,1,1,11*NImagesPerLevel);
 
-display(max(reshape(abs(imageInPrimaryUsingSensor-imageInPrimary)./imageInPrimaryUsingSensor, 1, [])));
+meanYOfTarget = mean(reshape(nanmean(nanmean(YImagesOfTarget)),NImagesPerLevel,11),1);
 
-%% Convert from primary values to CIE-XYZ
-imagesInXYZ = zeros(size(LMSStruct.LMSImageInCalFormat));
-for ii = 1:length(LMSStruct.luminanceLevels)
-    imagesInXYZ(:,:,ii) = cal.M_linear_device*imageInPrimary(:,:,ii);
-end
-
+%% Display results
+clc;
+display(['Mean luminance of standard images in cd/m^2 is ', num2str(meanStandard, 3)]);
+display(['Mean luminance of target objects in cd/m^2 are ', newline,num2str(meanYOfTarget, 3)]);
