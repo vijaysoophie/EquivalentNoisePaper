@@ -86,5 +86,5 @@ meanYOfTarget = mean(reshape(nanmean(nanmean(YImagesOfTarget)),NImagesPerLevel,1
 
 %% Display results
 clc;
-display(['Mean luminance of standard images in cd/m^2 is ', num2str(meanStandard, 3)]);
-display(['Mean luminance of target objects in cd/m^2 are ', newline,num2str(meanYOfTarget, 3)]);
+display(['Mean luminance of standard images in cd/m^2 is ', num2str(meanStandard, 4)]);
+display(['Mean luminance of target objects in cd/m^2 are ', newline,num2str(meanYOfTarget, 4)]);

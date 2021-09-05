@@ -13,11 +13,11 @@ makeDataForFigure4;
 
 %% Plot Figure
 hFig = figure();
-set(hFig,'units','pixels', 'Position', [100 100 1600 1200]);
+set(hFig,'units','pixels', 'Position', [100 100 1600 250]);
 
-for rowSubplot = 1:4
+for rowSubplot = 1
     for colSubplot = 1:6
-        subplot(4, 6, (rowSubplot - 1)*6 + colSubplot)
+        subplot(1, 6, (rowSubplot - 1)*6 + colSubplot)
         hold on; box on;
         %% Plot a vertical line indicating the standard
         lStdY = plot([LRFLevels(6) LRFLevels(6)], yLimits,':r','LineWidth', 1);
@@ -66,7 +66,7 @@ for rowSubplot = 1:4
         
         
         % Subplot x-Label
-        if (rowSubplot == 4)
+        if (rowSubplot == 1)
             xlabel('Comparison LRF', 'Fontsize', 15);
         end
         
