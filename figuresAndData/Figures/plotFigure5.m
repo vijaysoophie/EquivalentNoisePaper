@@ -97,11 +97,11 @@ plot(log10(covScaleModelForMarkers),log10(ModelThresholds.^2),'ks','MarkerFaceCo
 
 %%
 lFitLabel{1} = 'Mean Subject';
-lFitLabel{2} = ['SDT \{$\sigma_i, \sigma_e$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
+lFitLabel{2} = ['SDT \{$\sigma_i, \sigma_{e0}$\} = ','\{',num2str(sqrt(tsdSigma2_i),3), ', ', num2str(sqrt(tsdSigma2_e),3),'\}'];
 
 % Threshold for computational observer
 hold on; box on;
-lFitLabel{3} = ['LINRF \{$\sigma_i, \sigma_e$\} = \{0.0250, 0.0429\}'];
+lFitLabel{3} = ['LINRF \{$\sigma_i, \sigma_{e0}$\} = \{0.0250, 0.0429\}'];
 
 legend(lFitLabel,'interpreter','latex','location','northwest');
 set(gca, 'Fontsize',20);

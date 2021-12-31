@@ -1,18 +1,21 @@
 % This script plots Figure 7 of the Equivalent Noise paper. The figure is 
 % saved in the folder EquivalentNoisePaper/figuresAndData/Figures as 
-% Figure6.pdf.
+% Figure7.pdf.
 %
 % The internal and external noise for various observers are given below.
 % The noise of the SDT model were estimated by fitting the SDT model to the
 % subject threshold data. The noise for the LINRF model was estimated using
-% the formulas given the main text. See subsection Linear Receptive Field
-% Model Fit in the Methods section of the main text.
+% the formulae given the main text. See subsection Linear Receptive Field
+% Formulation Fit in the Methods section of the main text. 
+% Also see Figure6.m.
 %
 % Aug 15, 2021: Vijay Singh changed name to Figure7.
+% Dec 30, 2021: Vijay Singh modified to add panel Figure7b.
 
 %% Estimate the internal and external noise of the SDT Model
 % These were estimated by fitting the SDT model to the subject threshold
 % data. See subsection SDT Model Fit in the Methods section of the main text.
+% Also see Figure6.m.
 
 noiseEstimatedBySDTModel    = [24817        2       4       8      17;  % ObserverID       24817: Mean Observer
                                0.0256  0.0263  0.0246  0.0240  0.0274;  % Internal Noise
@@ -68,7 +71,8 @@ noiseEstimatedByLINRFModel = [24817        2       4       8       17; % Observe
                            
 %%                  
 figure;
-set(gcf,'Position',[100 100 800 500]);
+set(gcf,'Position',[100 100 1300 450]);
+subplot(1,2,1);
 hold on;
 plot([0.9:4.9], noiseEstimatedBySDTModel(2,:),'o', 'MarkerSize', 12, 'color', [0.39,0.83,0.07], 'linewidth', 2);
 plot([0.9:4.9], noiseEstimatedBySDTModel(3,:),'o', 'MarkerSize', 12, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
@@ -76,14 +80,30 @@ plot([0.9:4.9], noiseEstimatedBySDTModel(3,:),'o', 'MarkerSize', 12, 'MarkerFace
 plot([1.1:5.1], noiseEstimatedByLINRFModel(2,:), 's', 'MarkerSize', 15,'color', [0.39,0.83,0.07], 'linewidth', 2);
 plot([1.1:5.1], noiseEstimatedByLINRFModel(3,:), 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
 
-legend({'\sigma_{i,SDT}', '\sigma_{e0,SDT}', '\sigma_{i,LINRF}', '\sigma_{e0,LINRF}'}, 'location', 'northeastoutside', 'FontSize',20)
+legend({'\sigma_{i,SDT}', '\sigma_{e0,SDT}', '\sigma_{i,LINRF}', '\sigma_{e0,LINRF}'}, 'location', 'southwest', 'FontSize',20)
 xlim([0.5 5.5]);
 ylim([0. 0.05]);
 xticks([1:5]);
 yticks([0.01:0.01:0.05]);
 xticklabels({'Mean Obs', '2', '4','8', '17'});
 box on;
+title('(a)');
 set(gca, 'FontSize', 20);
 xlabel('Observer');
 ylabel('Noise Standard Deviation');
+
+%% Panel (b) Equivalent Noise Level
+subplot(1,2,2);
+hold on;
+plot([1.1:5.1], noiseEstimatedByLINRFModel(3,:)./noiseEstimatedByLINRFModel(2,:), ...
+    's', 'MarkerSize', 15, 'MarkerFaceColor', [0.00,0.45,0.74],'color', [0.00,0.45,0.74]);
+xlim([0.5 5.5]);
+ylim([1.0 2.0]);
+xticks([1:5]);
+xticklabels({'Mean Obs', '2', '4','8', '17'});
+box on;
+title('(b)');
+set(gca, 'FontSize', 20);
+xlabel('Observer');
+ylabel('Equivalent Noise Level (\sigma_{enl})');
 
